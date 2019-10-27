@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using KModkit;
 
@@ -190,6 +191,264 @@ public class WesterosScript : MonoBehaviour
             pressedButton.GetComponent<TextDisplay>().currentlyDisplayed++;
             pressedButton.GetComponent<TextDisplay>().currentlyDisplayed = pressedButton.GetComponent<TextDisplay>().currentlyDisplayed % 5;
             pressedButton.GetComponentInChildren<TextMesh>().text = pressedButton.GetComponent<TextDisplay>().textOptions[pressedButton.GetComponent<TextDisplay>().currentlyDisplayed];
+        }
+    }
+
+    //twitch plays
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} cycle [Cycles through all displays] | !{0} cycle <sigil/forename/house/words/seat> [Cycles through the specified display] | !{0} submit <sigil> <forename> <house> <words> <seat> [Submits the specified house stats] | Spaces are NOT allowed";
+    #pragma warning restore 414
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*cycle\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (parameters.Length == 2)
+            {
+                if (Regex.IsMatch(parameters[1], @"^\s*sigil\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                {
+                    yield return null;
+                    yield return new WaitForSeconds(0.5f);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        buttons[0].OnInteract();
+                        yield return "trycancel Sigil cycling cancelled due to a cancel request.";
+                        yield return new WaitForSeconds(2f);
+                    }
+                }
+                if (Regex.IsMatch(parameters[1], @"^\s*forename\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                {
+                    yield return null;
+                    yield return new WaitForSeconds(0.5f);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        buttons[1].OnInteract();
+                        yield return "trycancel Forename cycling cancelled due to a cancel request.";
+                        yield return new WaitForSeconds(2f);
+                    }
+                }
+                if (Regex.IsMatch(parameters[1], @"^\s*house\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                {
+                    yield return null;
+                    yield return new WaitForSeconds(0.5f);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        buttons[2].OnInteract();
+                        yield return "trycancel House cycling cancelled due to a cancel request.";
+                        yield return new WaitForSeconds(2f);
+                    }
+                }
+                if (Regex.IsMatch(parameters[1], @"^\s*words\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                {
+                    yield return null;
+                    yield return new WaitForSeconds(0.5f);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        buttons[3].OnInteract();
+                        yield return "trycancel Words cycling cancelled due to a cancel request.";
+                        yield return new WaitForSeconds(2f);
+                    }
+                }
+                if (Regex.IsMatch(parameters[1], @"^\s*seat\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                {
+                    yield return null;
+                    yield return new WaitForSeconds(0.5f);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        buttons[4].OnInteract();
+                        yield return "trycancel Seat cycling cancelled due to a cancel request.";
+                        yield return new WaitForSeconds(2f);
+                    }
+                }
+            }
+            else if(parameters.Length == 1)
+            {
+                yield return null;
+                yield return new WaitForSeconds(0.5f);
+                for (int i = 0; i < 5; i++)
+                {
+                    buttons[0].OnInteract();
+                    yield return "trycancel Cycling cancelled due to a cancel request.";
+                    yield return new WaitForSeconds(2f);
+                }
+                yield return new WaitForSeconds(0.5f);
+                for (int i = 0; i < 5; i++)
+                {
+                    buttons[1].OnInteract();
+                    yield return "trycancel Cycling cancelled due to a cancel request.";
+                    yield return new WaitForSeconds(2f);
+                }
+                yield return new WaitForSeconds(0.5f);
+                for (int i = 0; i < 5; i++)
+                {
+                    buttons[2].OnInteract();
+                    yield return "trycancel Cycling cancelled due to a cancel request.";
+                    yield return new WaitForSeconds(2f);
+                }
+                yield return new WaitForSeconds(0.5f);
+                for (int i = 0; i < 5; i++)
+                {
+                    buttons[3].OnInteract();
+                    yield return "trycancel Cycling cancelled due to a cancel request.";
+                    yield return new WaitForSeconds(2f);
+                }
+                yield return new WaitForSeconds(0.5f);
+                for (int i = 0; i < 5; i++)
+                {
+                    buttons[4].OnInteract();
+                    yield return "trycancel Cycling cancelled due to a cancel request.";
+                    yield return new WaitForSeconds(2f);
+                }
+            }
+            yield break;
+        }
+        if (Regex.IsMatch(parameters[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if(parameters.Length == 6)
+            {
+                yield return null;
+                string temp = "";
+                string temp2 = parameters[1].ToLower();
+                int count = 0;
+                while (!temp.Equals(temp2))
+                {
+                    buttons[0].OnInteract();
+                    temp = sigilDisplayed.rend.material.name.ToLower();
+                    temp = temp.Replace(" (instance)", "");
+                    if (count == 5)
+                    {
+                        yield return "sendtochaterror The Sigil '"+parameters[1]+"' is not an option!";
+                        for(int i = 0; i < sigilOptions.Length; i++)
+                        {
+                            string thing = "";
+                            thing = sigilOptions[i].name.ToLower();
+                            thing = thing.Replace(" (instance)", "");
+                            if (thing.Equals(temp2))
+                            {
+                                yield return "sendtochaterror Since this is a valid Sigil, an unsubmittable penalty will be applied.";
+                                yield return "unsubmittablepenalty";
+                                yield break;
+                            }
+                        }
+                        yield return "sendtochaterror Since this is not a valid Sigil, an unsubmittable penalty will not be applied.";
+                        yield break;
+                    }
+                    count++;
+                    yield return new WaitForSeconds(0.1f);
+                }
+                string tempp = "";
+                string tempp2 = parameters[2].ToLower();
+                int count2 = 0;
+                while (!tempp.Equals(tempp2))
+                {
+                    buttons[1].OnInteract();
+                    tempp = currentlyDisplayed[0].textMesh.text.ToLower();
+                    if (count2 == 5)
+                    {
+                        yield return "sendtochaterror The Forename '" + parameters[2] + "' is not an option!";
+                        for (int i = 0; i < forenameOptions.Length; i++)
+                        {
+                            string thing = "";
+                            thing = forenameOptions[i].ToLower();
+                            if (thing.Equals(tempp2))
+                            {
+                                yield return "sendtochaterror Since this is a valid Forename, an unsubmittable penalty will be applied.";
+                                yield return "unsubmittablepenalty";
+                                yield break;
+                            }
+                        }
+                        yield return "sendtochaterror Since this is not a valid Forename, an unsubmittable penalty will not be applied.";
+                        yield break;
+                    }
+                    count2++;
+                    yield return new WaitForSeconds(0.1f);
+                }
+                string temppp = "";
+                string temppp2 = parameters[3].ToLower();
+                int count3 = 0;
+                while (!temppp.Equals(temppp2))
+                {
+                    buttons[2].OnInteract();
+                    temppp = currentlyDisplayed[1].textMesh.text.ToLower();
+                    if (count3 == 5)
+                    {
+                        yield return "sendtochaterror The House '" + parameters[3] + "' is not an option!";
+                        for (int i = 0; i < familyNameOptions.Length; i++)
+                        {
+                            string thing = "";
+                            thing = familyNameOptions[i].ToLower();
+                            if (thing.Equals(temppp2))
+                            {
+                                yield return "sendtochaterror Since this is a valid House Name, an unsubmittable penalty will be applied.";
+                                yield return "unsubmittablepenalty";
+                                yield break;
+                            }
+                        }
+                        yield return "sendtochaterror Since this is not a valid House Name, an unsubmittable penalty will not be applied.";
+                        yield break;
+                    }
+                    count3++;
+                    yield return new WaitForSeconds(0.1f);
+                }
+                string tempppp = "";
+                string tempppp2 = parameters[4].ToLower();
+                int count4 = 0;
+                while (!tempppp.Equals(tempppp2))
+                {
+                    buttons[3].OnInteract();
+                    tempppp = currentlyDisplayed[2].textMesh.text.ToLower();
+                    tempppp = tempppp.Replace(" ", "");
+                    if (count4 == 5)
+                    {
+                        yield return "sendtochaterror The Words '" + parameters[4] + "' is not an option!";
+                        for (int i = 0; i < wordsOptions.Length; i++)
+                        {
+                            string thing = "";
+                            thing = wordsOptions[i].ToLower();
+                            if (thing.Equals(tempppp2))
+                            {
+                                yield return "sendtochaterror Since this is a valid set of Words, an unsubmittable penalty will be applied.";
+                                yield return "unsubmittablepenalty";
+                                yield break;
+                            }
+                        }
+                        yield return "sendtochaterror Since this is not a valid set of Words, an unsubmittable penalty will not be applied.";
+                        yield break;
+                    }
+                    count4++;
+                    yield return new WaitForSeconds(0.1f);
+                }
+                string temppppp = "";
+                string temppppp2 = parameters[5].ToLower();
+                int count5 = 0;
+                while (!temppppp.Equals(temppppp2))
+                {
+                    buttons[4].OnInteract();
+                    temppppp = currentlyDisplayed[3].textMesh.text.ToLower();
+                    temppppp = temppppp.Replace(" ", "");
+                    if (count5 == 5)
+                    {
+                        yield return "sendtochaterror The Seat '" + parameters[5] + "' is not an option!";
+                        for (int i = 0; i < seatOptions.Length; i++)
+                        {
+                            string thing = "";
+                            thing = seatOptions[i].ToLower();
+                            if (thing.Equals(temppppp2))
+                            {
+                                yield return "sendtochaterror Since this is a valid Seat, an unsubmittable penalty will be applied.";
+                                yield return "unsubmittablepenalty";
+                                yield break;
+                            }
+                        }
+                        yield return "sendtochaterror Since this is not a valid Seat, an unsubmittable penalty will not be applied.";
+                        yield break;
+                    }
+                    count5++;
+                    yield return new WaitForSeconds(0.1f);
+                }
+                submitButton.OnInteract();
+            }
+            yield break;
         }
     }
 }
