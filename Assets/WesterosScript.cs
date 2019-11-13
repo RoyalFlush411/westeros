@@ -196,7 +196,7 @@ public class WesterosScript : MonoBehaviour
 
     //twitch plays
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} cycle [Cycles through all displays] | !{0} cycle <sigil/forename/house/words/seat> [Cycles through the specified display] | !{0} submit <sigil> <forename> <house> <words> <seat> [Submits the specified house stats] | Spaces are NOT allowed";
+    private readonly string TwitchHelpMessage = @"!{0} cycle [Cycles through all displays] | !{0} cycle <sigil/forename/house/words/seat> [Cycles through the specified display] | !{0} submit <forename> <house> <words> <seat> [Submits the specified house stats] | Spaces are NOT allowed";
     #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
@@ -304,11 +304,11 @@ public class WesterosScript : MonoBehaviour
         }
         if (Regex.IsMatch(parameters[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
-            if(parameters.Length == 6)
+            if(parameters.Length == 5)
             {
                 yield return null;
                 string temp = "";
-                string temp2 = parameters[1].ToLower();
+                string temp2 = parameters[2].ToLower();
                 int count = 0;
                 while (!temp.Equals(temp2))
                 {
@@ -317,27 +317,14 @@ public class WesterosScript : MonoBehaviour
                     temp = temp.Replace(" (instance)", "");
                     if (count == 5)
                     {
-                        yield return "sendtochaterror The Sigil '"+parameters[1]+"' is not an option!";
-                        for(int i = 0; i < sigilOptions.Length; i++)
-                        {
-                            string thing = "";
-                            thing = sigilOptions[i].name.ToLower();
-                            thing = thing.Replace(" (instance)", "");
-                            if (thing.Equals(temp2))
-                            {
-                                yield return "sendtochaterror Since this is a valid Sigil, an unsubmittable penalty will be applied.";
-                                yield return "unsubmittablepenalty";
-                                yield break;
-                            }
-                        }
-                        yield return "sendtochaterror Since this is not a valid Sigil, an unsubmittable penalty will not be applied.";
+                        yield return "sendtochaterror The Sigil '"+parameters[2]+"' is not an option!";
                         yield break;
                     }
                     count++;
                     yield return new WaitForSeconds(0.1f);
                 }
                 string tempp = "";
-                string tempp2 = parameters[2].ToLower();
+                string tempp2 = parameters[1].ToLower();
                 int count2 = 0;
                 while (!tempp.Equals(tempp2))
                 {
@@ -345,26 +332,14 @@ public class WesterosScript : MonoBehaviour
                     tempp = currentlyDisplayed[0].textMesh.text.ToLower();
                     if (count2 == 5)
                     {
-                        yield return "sendtochaterror The Forename '" + parameters[2] + "' is not an option!";
-                        for (int i = 0; i < forenameOptions.Length; i++)
-                        {
-                            string thing = "";
-                            thing = forenameOptions[i].ToLower();
-                            if (thing.Equals(tempp2))
-                            {
-                                yield return "sendtochaterror Since this is a valid Forename, an unsubmittable penalty will be applied.";
-                                yield return "unsubmittablepenalty";
-                                yield break;
-                            }
-                        }
-                        yield return "sendtochaterror Since this is not a valid Forename, an unsubmittable penalty will not be applied.";
+                        yield return "sendtochaterror The Forename '" + parameters[1] + "' is not an option!";
                         yield break;
                     }
                     count2++;
                     yield return new WaitForSeconds(0.1f);
                 }
                 string temppp = "";
-                string temppp2 = parameters[3].ToLower();
+                string temppp2 = parameters[2].ToLower();
                 int count3 = 0;
                 while (!temppp.Equals(temppp2))
                 {
@@ -372,26 +347,14 @@ public class WesterosScript : MonoBehaviour
                     temppp = currentlyDisplayed[1].textMesh.text.ToLower();
                     if (count3 == 5)
                     {
-                        yield return "sendtochaterror The House '" + parameters[3] + "' is not an option!";
-                        for (int i = 0; i < familyNameOptions.Length; i++)
-                        {
-                            string thing = "";
-                            thing = familyNameOptions[i].ToLower();
-                            if (thing.Equals(temppp2))
-                            {
-                                yield return "sendtochaterror Since this is a valid House Name, an unsubmittable penalty will be applied.";
-                                yield return "unsubmittablepenalty";
-                                yield break;
-                            }
-                        }
-                        yield return "sendtochaterror Since this is not a valid House Name, an unsubmittable penalty will not be applied.";
+                        yield return "sendtochaterror The House '" + parameters[2] + "' is not an option!";
                         yield break;
                     }
                     count3++;
                     yield return new WaitForSeconds(0.1f);
                 }
                 string tempppp = "";
-                string tempppp2 = parameters[4].ToLower();
+                string tempppp2 = parameters[3].ToLower();
                 int count4 = 0;
                 while (!tempppp.Equals(tempppp2))
                 {
@@ -400,26 +363,14 @@ public class WesterosScript : MonoBehaviour
                     tempppp = tempppp.Replace(" ", "");
                     if (count4 == 5)
                     {
-                        yield return "sendtochaterror The Words '" + parameters[4] + "' is not an option!";
-                        for (int i = 0; i < wordsOptions.Length; i++)
-                        {
-                            string thing = "";
-                            thing = wordsOptions[i].ToLower();
-                            if (thing.Equals(tempppp2))
-                            {
-                                yield return "sendtochaterror Since this is a valid set of Words, an unsubmittable penalty will be applied.";
-                                yield return "unsubmittablepenalty";
-                                yield break;
-                            }
-                        }
-                        yield return "sendtochaterror Since this is not a valid set of Words, an unsubmittable penalty will not be applied.";
+                        yield return "sendtochaterror The Words '" + parameters[3] + "' is not an option!";
                         yield break;
                     }
                     count4++;
                     yield return new WaitForSeconds(0.1f);
                 }
                 string temppppp = "";
-                string temppppp2 = parameters[5].ToLower();
+                string temppppp2 = parameters[4].ToLower();
                 int count5 = 0;
                 while (!temppppp.Equals(temppppp2))
                 {
@@ -428,19 +379,7 @@ public class WesterosScript : MonoBehaviour
                     temppppp = temppppp.Replace(" ", "");
                     if (count5 == 5)
                     {
-                        yield return "sendtochaterror The Seat '" + parameters[5] + "' is not an option!";
-                        for (int i = 0; i < seatOptions.Length; i++)
-                        {
-                            string thing = "";
-                            thing = seatOptions[i].ToLower();
-                            if (thing.Equals(temppppp2))
-                            {
-                                yield return "sendtochaterror Since this is a valid Seat, an unsubmittable penalty will be applied.";
-                                yield return "unsubmittablepenalty";
-                                yield break;
-                            }
-                        }
-                        yield return "sendtochaterror Since this is not a valid Seat, an unsubmittable penalty will not be applied.";
+                        yield return "sendtochaterror The Seat '" + parameters[4] + "' is not an option!";
                         yield break;
                     }
                     count5++;
