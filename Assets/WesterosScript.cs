@@ -342,6 +342,7 @@ public class WesterosScript : MonoBehaviour
                     {
                         yield return "sendtochaterror The sigil '" + parameters[1] + "' does not exist!";
                     }
+                    yield break;
                 }
                 List<string[]> arrays = new List<string[]>();
                 arrays.Add(forenameOptions);
@@ -405,6 +406,7 @@ public class WesterosScript : MonoBehaviour
                         {
                             yield return "sendtochaterror The " + names[k-1] + " '" + parameters[k+1] + "' does not exist!";
                         }
+                        yield break;
                     }
                 }
                 submitButton.OnInteract();
