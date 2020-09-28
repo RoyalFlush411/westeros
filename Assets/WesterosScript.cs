@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using KModkit;
 
@@ -25,6 +26,8 @@ public class WesterosScript : MonoBehaviour
     private int correctIndex = 0;
     public String[] correctAnswers;
 
+    private bool hasActivated = false;
+
     //Logging
     static int moduleIdCounter = 1;
     int moduleId;
@@ -39,6 +42,7 @@ public class WesterosScript : MonoBehaviour
             button.OnInteract += delegate () { PressButton(pressedButton); return false; };
         }
         submitButton.OnInteract += delegate () { PressSubmit(); return false; };
+        GetComponent<KMBombModule>().OnActivate += OnActivate;
     }
 
 
@@ -46,6 +50,28 @@ public class WesterosScript : MonoBehaviour
     {
         PickCorrectAnswer();
         PickDecoys();
+        LogData();
+        if (!hasActivated)
+        {
+            sigilDisplayed.rend.material = sigilOptions[20];
+            for (int i = 0; i < 4; i++)
+            {
+                currentlyDisplayed[i].textMesh.text = "";
+            }
+        }
+    }
+
+    void OnActivate()
+    {
+        hasActivated = true;
+        sigilDisplayed.currentlyDisplayed = UnityEngine.Random.Range(0, 5);
+        sigilDisplayed.rend.material = sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed];
+
+        for (int i = 0; i < 4; i++)
+        {
+            currentlyDisplayed[i].currentlyDisplayed = UnityEngine.Random.Range(0, 5);
+            currentlyDisplayed[i].textMesh.text = currentlyDisplayed[i].textOptions[currentlyDisplayed[i].currentlyDisplayed];
+        }
     }
 
     void PickCorrectAnswer()
@@ -66,7 +92,6 @@ public class WesterosScript : MonoBehaviour
         {
             chosenIndices.Add(correctIndex);
         }
-        Debug.LogFormat("[Westeros #{0}] Submit {1}.", moduleId, string.Join(", ", correctAnswers.Select((x) => x).ToArray()));
     }
 
     void PickDecoys()
@@ -137,14 +162,45 @@ public class WesterosScript : MonoBehaviour
         }
         tempChosenIndices.Clear();
 
-        sigilDisplayed.currentlyDisplayed = UnityEngine.Random.Range(0,5);
-        sigilDisplayed.rend.material = sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed];
-
-        for(int i = 0; i < 4; i++)
+        if (hasActivated)
         {
-            currentlyDisplayed[i].currentlyDisplayed = UnityEngine.Random.Range(0,5);
-            currentlyDisplayed[i].textMesh.text = currentlyDisplayed[i].textOptions[currentlyDisplayed[i].currentlyDisplayed];
+            sigilDisplayed.currentlyDisplayed = UnityEngine.Random.Range(0, 5);
+            sigilDisplayed.rend.material = sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed];
+
+            for (int i = 0; i < 4; i++)
+            {
+                currentlyDisplayed[i].currentlyDisplayed = UnityEngine.Random.Range(0, 5);
+                currentlyDisplayed[i].textMesh.text = currentlyDisplayed[i].textOptions[currentlyDisplayed[i].currentlyDisplayed];
+            }
         }
+    }
+
+    void LogData()
+    {
+        List<List<int>> randos = new List<List<int>>();
+        for(int i = 0; i < 5; i++)
+        {
+            List<int> temp = new List<int>();
+            for (int j = 0; j < 5; j++)
+            {
+                temp.Add(j);
+            }
+            randos.Add(temp);
+        }
+        for(int i = 0; i < 5; i++)
+        {
+            randos[i] = randos[i].Shuffle();
+        }
+        Debug.LogFormat("[Westeros #{0}] The possible sigils are: {1}, {2}, {3}, {4}, and {5}", moduleId, sigilDisplayed.sigilOptions[randos[0][0]].name, sigilDisplayed.sigilOptions[randos[0][1]].name, sigilDisplayed.sigilOptions[randos[0][2]].name, sigilDisplayed.sigilOptions[randos[0][3]].name, sigilDisplayed.sigilOptions[randos[0][4]].name);
+        Debug.LogFormat("[Westeros #{0}] The possible forenames are: {1}, {2}, {3}, {4}, and {5}", moduleId, currentlyDisplayed[0].textOptions[randos[1][0]], currentlyDisplayed[0].textOptions[randos[1][1]], currentlyDisplayed[0].textOptions[randos[1][2]], currentlyDisplayed[0].textOptions[randos[1][3]], currentlyDisplayed[0].textOptions[randos[1][4]]);
+        Debug.LogFormat("[Westeros #{0}] The possible houses are: {1}, {2}, {3}, {4}, and {5}", moduleId, currentlyDisplayed[1].textOptions[randos[2][0]], currentlyDisplayed[1].textOptions[randos[2][1]], currentlyDisplayed[1].textOptions[randos[2][2]], currentlyDisplayed[1].textOptions[randos[2][3]], currentlyDisplayed[1].textOptions[randos[2][4]]);
+        Debug.LogFormat("[Westeros #{0}] The possible words are: \"{1}\", \"{2}\", \"{3}\", \"{4}\", and \"{5}\"", moduleId, currentlyDisplayed[2].textOptions[randos[3][0]].Replace("  ", " "), currentlyDisplayed[2].textOptions[randos[3][1]].Replace("  ", " "), currentlyDisplayed[2].textOptions[randos[3][2]].Replace("  ", " "), currentlyDisplayed[2].textOptions[randos[3][3]].Replace("  ", " "), currentlyDisplayed[2].textOptions[randos[3][4]].Replace("  ", " "));
+        Debug.LogFormat("[Westeros #{0}] The possible seats are: {1}, {2}, {3}, {4}, and {5}", moduleId, currentlyDisplayed[3].textOptions[randos[4][0]].Replace("  ", " "), currentlyDisplayed[3].textOptions[randos[4][1]].Replace("  ", " "), currentlyDisplayed[3].textOptions[randos[4][2]].Replace("  ", " "), currentlyDisplayed[3].textOptions[randos[4][3]].Replace("  ", " "), currentlyDisplayed[3].textOptions[randos[4][4]].Replace("  ", " "));
+        Debug.LogFormat("[Westeros #{0}] The correct sigil is: {1}", moduleId, correctAnswers[0]);
+        Debug.LogFormat("[Westeros #{0}] The correct forename is: {1}", moduleId, correctAnswers[1]);
+        Debug.LogFormat("[Westeros #{0}] The correct house is: {1}", moduleId, correctAnswers[2]);
+        Debug.LogFormat("[Westeros #{0}] The correct words are: \"{1}\"", moduleId, correctAnswers[3].Replace("  ", " "));
+        Debug.LogFormat("[Westeros #{0}] The correct seat is: {1}", moduleId, correctAnswers[4].Replace("  ", " "));
     }
 
     public void PressSubmit()
@@ -154,17 +210,22 @@ public class WesterosScript : MonoBehaviour
             return;
         }
         submitButton.AddInteractionPunch();
-        GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, submitButton.transform);
         if(sigilDisplayed.currentlyDisplayed == 0 && currentlyDisplayed[0].currentlyDisplayed == 0 && currentlyDisplayed[1].currentlyDisplayed == 0 && currentlyDisplayed[2].currentlyDisplayed == 0 && currentlyDisplayed[3].currentlyDisplayed == 0)
         {
-            Debug.LogFormat("[Westeros #{0}] Input correct. Module disarmed.", moduleId);
+            Debug.LogFormat("[Westeros #{0}] You submitted {1}, {2}, {3}, \"{4}\", and {5}. Input correct, module disarmed.", moduleId, sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed].name, currentlyDisplayed[0].textOptions[currentlyDisplayed[0].currentlyDisplayed], currentlyDisplayed[1].textOptions[currentlyDisplayed[1].currentlyDisplayed], currentlyDisplayed[2].textOptions[currentlyDisplayed[2].currentlyDisplayed].Replace("  ", " "), currentlyDisplayed[3].textOptions[currentlyDisplayed[3].currentlyDisplayed].Replace("  ", " "));
             GetComponent<KMBombModule>().HandlePass();
             moduleSolved = true;
             Audio.PlaySoundAtTransform("theme", transform);
+            sigilDisplayed.rend.material = sigilOptions[20];
+            for (int i = 0; i < 4; i++)
+            {
+                currentlyDisplayed[i].textMesh.text = "";
+            }
         }
         else
         {
-            Debug.LogFormat("[Westeros #{0}] Strike! You submitted {1}, {2}, {3}, {4}, {5}. That is incorrect. Module reset.", moduleId, sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed].name, currentlyDisplayed[0].textOptions[currentlyDisplayed[0].currentlyDisplayed], currentlyDisplayed[1].textOptions[currentlyDisplayed[1].currentlyDisplayed], currentlyDisplayed[2].textOptions[currentlyDisplayed[2].currentlyDisplayed], currentlyDisplayed[3].textOptions[currentlyDisplayed[3].currentlyDisplayed]);
+            Debug.LogFormat("[Westeros #{0}] You submitted {1}, {2}, {3}, \"{4}\", and {5}. Input incorrect, Strike! Module reset.", moduleId, sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed].name, currentlyDisplayed[0].textOptions[currentlyDisplayed[0].currentlyDisplayed], currentlyDisplayed[1].textOptions[currentlyDisplayed[1].currentlyDisplayed], currentlyDisplayed[2].textOptions[currentlyDisplayed[2].currentlyDisplayed].Replace("  ", " "), currentlyDisplayed[3].textOptions[currentlyDisplayed[3].currentlyDisplayed].Replace("  ", " "));
             GetComponent<KMBombModule>().HandleStrike();
             chosenIndices.Clear();
             Start();
@@ -178,7 +239,7 @@ public class WesterosScript : MonoBehaviour
             return;
         }
         pressedButton.AddInteractionPunch(0.5f);
-        GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pressedButton.transform);
         if(pressedButton.name == "Sigil")
         {
             pressedButton.GetComponent<SigilDisplay>().currentlyDisplayed++;
@@ -191,5 +252,188 @@ public class WesterosScript : MonoBehaviour
             pressedButton.GetComponent<TextDisplay>().currentlyDisplayed = pressedButton.GetComponent<TextDisplay>().currentlyDisplayed % 5;
             pressedButton.GetComponentInChildren<TextMesh>().text = pressedButton.GetComponent<TextDisplay>().textOptions[pressedButton.GetComponent<TextDisplay>().currentlyDisplayed];
         }
+    }
+
+    //twitch plays
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} cycle (sigil) (words) ... [Cycles through the specified display(s)] | !{0} submit <sigil> <forename> <house> <words> <seat> [Submits the specified Westerosi house stats, where 'words' and 'seat' must have no spaces. 'sigil' must be a valid house name]";
+    #pragma warning restore 414
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*cycle\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (parameters.Length == 1)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    for (int j = 0; j < 5; j++)
+                    {
+                        yield return "trycancel Cycling halted due to a request to cancel!";
+                        yield return new WaitForSeconds(1.5f);
+                        buttons[i].OnInteract();
+                    }
+                    yield return new WaitForSeconds(1f);
+                }
+            }
+            else if (parameters.Length >= 2)
+            {
+                string[] types = { "sigil", "sigils", "forename", "forenames", "house", "houses", "word", "words", "seat", "seats" };
+                int[] indexes = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4 };
+                for(int i = 1; i < parameters.Length; i++)
+                {
+                    if (!types.Contains(parameters[i].ToLower()))
+                    {
+                        yield return "sendtochaterror The specified display '" + parameters[i] + "' is invalid!";
+                        yield break;
+                    }
+                }
+                for (int i = 1; i < parameters.Length; i++)
+                {
+                    int index = Array.IndexOf(types, parameters[i].ToLower());
+                    for (int j = 0; j < 5; j++)
+                    {
+                        yield return "trycancel Cycling halted due to a request to cancel!";
+                        yield return new WaitForSeconds(1.5f);
+                        buttons[indexes[index]].OnInteract();
+                    }
+                    yield return new WaitForSeconds(1f);
+                }
+            }
+            yield break;
+        }
+        if (Regex.IsMatch(parameters[0], @"^\s*submit\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (parameters.Length > 6)
+            {
+                yield return "sendtochaterror Too many parameters!";
+            }
+            else if (parameters.Length == 6)
+            {
+                bool madeit1 = false;
+                bool madeit2 = false;
+                for(int i = 0; i < 5; i++)
+                {
+                    if (parameters[1].EqualsIgnoreCase(sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed].name))
+                    {
+                        madeit1 = true;
+                        break;
+                    }
+                    else
+                    {
+                        buttons[0].OnInteract();
+                        yield return new WaitForSeconds(0.1f);
+                    }
+                }
+                if (!madeit1)
+                {
+                    for (int j = 0; j < 20; j++)
+                    {
+                        if (sigilOptions[j].name.EqualsIgnoreCase(parameters[1]))
+                        {
+                            madeit2 = true;
+                            yield return "sendtochaterror The sigil '" + parameters[1] + "' is not an option!";
+                            yield return "unsubmittablepenalty";
+                        }
+                    }
+                    if (!madeit2)
+                    {
+                        yield return "sendtochaterror The sigil '" + parameters[1] + "' does not exist!";
+                    }
+                    yield break;
+                }
+                List<string[]> arrays = new List<string[]>();
+                arrays.Add(forenameOptions);
+                arrays.Add(familyNameOptions);
+                arrays.Add(wordsOptions);
+                arrays.Add(seatOptions);
+                string[] names = { "forename", "house", "words", "seat" };
+                for (int k = 1; k < 5; k++)
+                {
+                    madeit1 = false;
+                    madeit2 = false;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        string checker;
+                        if (k == 3 || k == 4)
+                        {
+                            checker = currentlyDisplayed[k-1].textOptions[currentlyDisplayed[k-1].currentlyDisplayed].Replace("  ", "");
+                        }
+                        else
+                        {
+                            checker = currentlyDisplayed[k-1].textOptions[currentlyDisplayed[k-1].currentlyDisplayed];
+                        }
+                        if (parameters[k+1].EqualsIgnoreCase(checker))
+                        {
+                            madeit1 = true;
+                            break;
+                        }
+                        buttons[k].OnInteract();
+                        yield return new WaitForSeconds(0.1f);
+                    }
+                    if (!madeit1)
+                    {
+                        int total;
+                        if (k == 1)
+                        {
+                            total = 100;
+                        }
+                        else
+                        {
+                            total = 20;
+                        }
+                        for (int j = 0; j < total; j++)
+                        {
+                            string checker;
+                            if (k == 3 || k == 4)
+                            {
+                                checker = arrays[k-1][j].Replace("  ", "");
+                            }
+                            else
+                            {
+                                checker = arrays[k-1][j];
+                            }
+                            if (checker.EqualsIgnoreCase(parameters[k+1]))
+                            {
+                                madeit2 = true;
+                                yield return "sendtochaterror The " + names[k-1] + " '" + parameters[k+1] + "' is not an option!";
+                                yield return "unsubmittablepenalty";
+                            }
+                        }
+                        if (!madeit2)
+                        {
+                            yield return "sendtochaterror The " + names[k-1] + " '" + parameters[k+1] + "' does not exist!";
+                        }
+                        yield break;
+                    }
+                }
+                submitButton.OnInteract();
+            }
+            else if (parameters.Length < 6)
+            {
+                yield return "sendtochaterror Please specify all Westerosi stats needed to submit!";
+            }
+            yield break;
+        }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        while (!sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed].name.Equals(correctAnswers[0]))
+        {
+            buttons[0].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+        for(int i = 0; i < 4; i++)
+        {
+            while (!currentlyDisplayed[i].textOptions[currentlyDisplayed[i].currentlyDisplayed].Equals(correctAnswers[i+1]))
+            {
+                buttons[i+1].OnInteract();
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+        submitButton.OnInteract();
     }
 }

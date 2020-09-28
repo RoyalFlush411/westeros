@@ -1,1 +1,1 @@
-westeros (Git)
+#[ModKit Wiki](../../wiki)
