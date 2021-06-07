@@ -27,6 +27,7 @@ public class WesterosScript : MonoBehaviour
     public String[] correctAnswers;
 
     private bool hasActivated = false;
+    private bool TwitchPlaysActive;
 
     //Logging
     static int moduleIdCounter = 1;
@@ -65,6 +66,9 @@ public class WesterosScript : MonoBehaviour
     {
         hasActivated = true;
         sigilDisplayed.currentlyDisplayed = UnityEngine.Random.Range(0, 5);
+        sigilDisplayed.tpDisplayText.text = (sigilDisplayed.currentlyDisplayed + 1).ToString();
+        if (TwitchPlaysActive)
+            sigilDisplayed.tpDisplay.SetActive(true);
         sigilDisplayed.rend.material = sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed];
 
         for (int i = 0; i < 4; i++)
@@ -165,6 +169,7 @@ public class WesterosScript : MonoBehaviour
         if (hasActivated)
         {
             sigilDisplayed.currentlyDisplayed = UnityEngine.Random.Range(0, 5);
+            sigilDisplayed.tpDisplayText.text = (sigilDisplayed.currentlyDisplayed + 1).ToString();
             sigilDisplayed.rend.material = sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed];
 
             for (int i = 0; i < 4; i++)
@@ -222,6 +227,7 @@ public class WesterosScript : MonoBehaviour
             {
                 currentlyDisplayed[i].textMesh.text = "";
             }
+            sigilDisplayed.tpDisplayText.text = "";
         }
         else
         {
@@ -244,6 +250,7 @@ public class WesterosScript : MonoBehaviour
         {
             pressedButton.GetComponent<SigilDisplay>().currentlyDisplayed++;
             pressedButton.GetComponent<SigilDisplay>().currentlyDisplayed = pressedButton.GetComponent<SigilDisplay>().currentlyDisplayed % 5;
+            pressedButton.GetComponent<SigilDisplay>().tpDisplayText.text = (pressedButton.GetComponent<SigilDisplay>().currentlyDisplayed + 1).ToString();
             pressedButton.GetComponent<Renderer>().material = pressedButton.GetComponent<SigilDisplay>().sigilOptions[pressedButton.GetComponent<SigilDisplay>().currentlyDisplayed];
         }
         else
@@ -256,7 +263,7 @@ public class WesterosScript : MonoBehaviour
 
     //twitch plays
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} cycle (sigil) (words) ... [Cycles through the specified display(s)] | !{0} submit <sigil> <forename> <house> <words> <seat> [Submits the specified Westerosi house stats, where 'words' and 'seat' must have no spaces. 'sigil' must be a valid house name]";
+    private readonly string TwitchHelpMessage = @"!{0} cycle (stat1) (stat2)... [Cycles through the specified display(s) showing Westerosi house stat(s) 'stat1' (and 'stat2' or more)] | !{0} submit <sigil> <forename> <house> <words> <seat> [Submits the specified Westerosi house stats where 'words' and 'seat' must have no spaces and 'sigil' must be a number from 1-5]";
     #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
@@ -316,7 +323,7 @@ public class WesterosScript : MonoBehaviour
                 bool madeit2 = false;
                 for(int i = 0; i < 5; i++)
                 {
-                    if (parameters[1].EqualsIgnoreCase(sigilDisplayed.sigilOptions[sigilDisplayed.currentlyDisplayed].name))
+                    if (parameters[1].EqualsIgnoreCase(sigilDisplayed.tpDisplayText.text))
                     {
                         madeit1 = true;
                         break;
@@ -329,19 +336,7 @@ public class WesterosScript : MonoBehaviour
                 }
                 if (!madeit1)
                 {
-                    for (int j = 0; j < 20; j++)
-                    {
-                        if (sigilOptions[j].name.EqualsIgnoreCase(parameters[1]))
-                        {
-                            madeit2 = true;
-                            yield return "sendtochaterror The sigil '" + parameters[1] + "' is not an option!";
-                            yield return "unsubmittablepenalty";
-                        }
-                    }
-                    if (!madeit2)
-                    {
-                        yield return "sendtochaterror The sigil '" + parameters[1] + "' does not exist!";
-                    }
+                    yield return "sendtochaterror The sigil '" + parameters[1] + "' is out of range 1-5!";
                     yield break;
                 }
                 List<string[]> arrays = new List<string[]>();
